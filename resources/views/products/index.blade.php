@@ -1,11 +1,12 @@
-@extends('layouts.app1')
+@extends('layouts.app')
 
 @section('content')
-@foreach ($products as $product)
-<div>
-    <a href={{"/products/".$product->id}}>
-        <h1> {{$product->name}} </h1></a>
-</div>
-    
-@endforeach
+    @foreach ($products as $product)
+        <div class="container">
+            <a href={{"/products/".$product->id}}>
+                <h3>{{$product->name}} </h3></a>
+            <p><strong>Creator : </strong> {{$product->user->name}}</p>
+        </div>
+
+    @endforeach
 @endsection

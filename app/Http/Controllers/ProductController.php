@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Category;
 use Illuminate\Http\Request;
 use App\Product;
 use App\Http\Requests\CreateRequest;
@@ -11,7 +12,7 @@ class ProductController extends Controller
 {
     public function index()
     {
-        $products = Product::all();
+        $products = Product::with(['user'])->get();
         // $products = DB::table('products')->orderBy('name')
         //     ->get();
         return view('products.index', compact('products'));
@@ -19,14 +20,15 @@ class ProductController extends Controller
 
     public function show($id)
     {
-        $product = Product::findOrFail($id);
+        $product = Product::with('categories')->findOrFail($id);
         // $product = DB::table('products')->find($id);
         return view('products.show', compact('product'));
     }
 
     public function create()
     {
-        return view('products.create');
+        $categories = Category::all();
+        return view('products.create', compact('categories'));
     }
 
     public function store(CreateRequest $request)
@@ -37,8 +39,11 @@ class ProductController extends Controller
         //     'weight' => 'required',
         //     'price' => 'required'
         // ]);
+        dd($request->all());
         $request->validated();
-        Auth::user()->products()->create($request->except('_token'));
+        $product = Auth::user()->products()->create($request->except('_token'));
+        $product->categories()->attach($request->get('category_id'));
+        return redirect('/products');
         //$product = Product::create($request->except('_token'));
     }
 }
