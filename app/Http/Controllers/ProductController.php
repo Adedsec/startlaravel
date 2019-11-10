@@ -7,9 +7,15 @@ use Illuminate\Http\Request;
 use App\Product;
 use App\Http\Requests\CreateRequest;
 use Illuminate\Support\Facades\Auth;
+use Symfony\Component\HttpFoundation\Response as HttpResponse;
 
 class ProductController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('auth')->only(['create', 'edit']);
+    }
+
     public function index()
     {
         $products = Product::with(['user'])->get();
@@ -39,11 +45,38 @@ class ProductController extends Controller
         //     'weight' => 'required',
         //     'price' => 'required'
         // ]);
-        dd($request->all());
+        //dd($request->all());
         $request->validated();
         $product = Auth::user()->products()->create($request->except('_token'));
         $product->categories()->attach($request->get('category_id'));
         return redirect('/products');
         //$product = Product::create($request->except('_token'));
+    }
+
+    public function edit($id)
+    {
+        $product = Product::find($id);
+        $categories = Category::all();
+        abort_if(($product->user->id != Auth::user()->id), HttpResponse::HTTP_UNAUTHORIZED);
+        // if ($product->user->id != Auth::user()->id) {
+        //     # code...
+        //     //return redirect('/products');
+        //     abort(HttpResponse::HTTP_UNAUTHORIZED, 'you are not authorized');
+        // }
+        return view('products.edit', compact('product', 'categories'));
+    }
+
+    public function update(Request $request, $id)
+    {
+
+        //find
+        $product = Product::find($id);
+        //update product
+        $product->update($request->only(['name', 'description', 'weight', 'price']));
+
+        //update categories
+
+        $product->categories()->sync($request->get('category_id'));
+        return redirect('/products');
     }
 }
