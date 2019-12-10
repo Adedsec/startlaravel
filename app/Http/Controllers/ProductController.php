@@ -3,11 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Category;
+use App\Events\ProductCreated;
 use Illuminate\Http\Request;
 use App\Product;
 use App\Http\Requests\CreateRequest;
 use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response as HttpResponse;
+
 
 class ProductController extends Controller
 {
@@ -49,6 +51,8 @@ class ProductController extends Controller
         $request->validated();
         $product = Auth::user()->products()->create($request->except('_token'));
         $product->categories()->attach($request->get('category_id'));
+        //sending mail
+        event(new ProductCreated($product, Auth::user()));
         return redirect('/products');
         //$product = Product::create($request->except('_token'));
     }
@@ -57,7 +61,8 @@ class ProductController extends Controller
     {
         $product = Product::find($id);
         $categories = Category::all();
-        abort_if(($product->user->id != Auth::user()->id), HttpResponse::HTTP_UNAUTHORIZED);
+        $this->authorize('update', $product);
+        //abort_if(($product->user->id != Auth::user()->id), HttpResponse::HTTP_UNAUTHORIZED);
         // if ($product->user->id != Auth::user()->id) {
         //     # code...
         //     //return redirect('/products');
@@ -78,5 +83,23 @@ class ProductController extends Controller
 
         $product->categories()->sync($request->get('category_id'));
         return redirect('/products');
+    }
+
+
+    // API
+
+    public function showAPI($id)
+    {
+        return $product = Product::with('categories')->findOrFail($id);
+    }
+
+    public function indexAPI()
+    {
+        return Product::with(['user'])->get();
+    }
+    public function storeAPI(Request $request)
+    {
+        dd(Auth::user());
+        $product = Auth::user()->products()->create($request->except('_token'));
     }
 }

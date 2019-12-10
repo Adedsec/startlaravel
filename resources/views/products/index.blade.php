@@ -13,9 +13,13 @@
                     <td><a href={{"/products/".$product->id}}>
                             <p>{{$product->name}} </p></a></td>
                     <td><p>{{$product->user->name}}</p></td>
-                    <td>
-                        <a href="{{Route('products.edit',["id"=>$product->id])}}" class="btn btn-primary">Update</a>
-                    </td>
+                    @can('update',$product)
+                        <td>
+                            <a href="{{Route('products.edit',["id"=>$product->id])}}" class="btn btn-primary">Update</a>
+                        </td>
+                    @else
+                        <td></td>
+                    @endcan
                 </tr>
 
             @endforeach

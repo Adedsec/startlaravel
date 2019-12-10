@@ -2,6 +2,9 @@
 
 namespace App\Providers;
 
+use App\Events\ProductCreated;
+use App\Listeners\SendAdminSms;
+use App\Listeners\SendUserEmail;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
@@ -15,9 +18,14 @@ class EventServiceProvider extends ServiceProvider
      * @var array
      */
     protected $listen = [
+        ProductCreated::class => [
+            SendAdminSms::class,
+            SendUserEmail::class
+        ],
         Registered::class => [
             SendEmailVerificationNotification::class,
         ],
+
     ];
 
     /**

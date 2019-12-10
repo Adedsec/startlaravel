@@ -15,6 +15,7 @@
 //    return view('welcome');
 //});
 
+use App\Http\Controllers\ProductController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', 'PagesController@index');
@@ -34,4 +35,3 @@ Auth::routes();
 Route::get('/home', 'HomeController@index')->name('home');
 Route::get('products/{id}/edit', 'ProductController@edit')->name('products.edit');
 Route::put('products/{id}', 'ProductController@update')->name('products.update');
-
